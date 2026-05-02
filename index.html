@@ -5,37 +5,56 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Monica's Deep Space Universe</title>
     <style>
-        /* Importando una fuente similar a la de la imagen */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@900&display=swap');
 
         body {
             margin: 0;
             background-color: #000;
             overflow: hidden;
-            font-family: 'Inter', sans-serif; /* Fuente tipo la imagen 1 */
+            font-family: 'Inter', sans-serif;
             height: 100vh;
             width: 100vw;
-            perspective: 1200px; 
+            perspective: 1000px; /* Reducido un poco para móviles */
             position: relative;
             cursor: crosshair;
+            touch-action: none; /* Evita el scroll accidental en el cel */
         }
 
-        /* --- NEBULOSAS --- */
+        /* --- NEBULOSAS RESPONSIVAS --- */
         .nebula {
             position: absolute;
             border-radius: 50%;
-            filter: blur(120px);
-            opacity: 0.35;
+            filter: blur(80px); /* Menos blur para mejor rendimiento en cel */
+            opacity: 0.3;
             z-index: -5;
             transition: all 12s ease-in-out;
             pointer-events: none;
         }
-        .n1 { width: 600px; height: 600px; background: radial-gradient(circle, #6a0dad, transparent); }
-        .n2 { width: 500px; height: 500px; background: radial-gradient(circle, #001f3f, transparent); }
-        .n3 { width: 450px; height: 450px; background: radial-gradient(circle, #4b0082, transparent); }
-        .n4 { width: 550px; height: 550px; background: radial-gradient(circle, #1e90ff, transparent); }
-        .n5 { width: 400px; height: 400px; background: radial-gradient(circle, #8a2be2, transparent); }
-        .n6 { width: 500px; height: 500px; background: radial-gradient(circle, #00008b, transparent); }
+
+        /* Ajuste de tamaños para escritorio */
+        .n1 { width: 60vw; height: 60vw; background: radial-gradient(circle, #6a0dad, transparent); }
+        .n2 { width: 50vw; height: 50vw; background: radial-gradient(circle, #001f3f, transparent); }
+        .n3 { width: 45vw; height: 45vw; background: radial-gradient(circle, #4b0082, transparent); }
+        .n4 { width: 55vw; height: 55vw; background: radial-gradient(circle, #1e90ff, transparent); }
+        .n5 { width: 40vw; height: 40vw; background: radial-gradient(circle, #8a2be2, transparent); }
+        .n6 { width: 50vw; height: 50vw; background: radial-gradient(circle, #00008b, transparent); }
+
+        /* --- MEDIA QUERY PARA CELULARES --- */
+        @media (max-width: 768px) {
+            .nebula {
+                filter: blur(50px);
+                opacity: 0.4;
+            }
+            .moon {
+                width: 50px !important;
+                height: 50px !important;
+                right: 5% !important;
+            }
+            .floating-text {
+                letter-spacing: -0.5px !important; /* Menos apretado en pantallas chicas */
+                text-shadow: 0 0 5px rgba(255, 255, 255, 0.8) !important;
+            }
+        }
 
         .moon {
             position: absolute;
@@ -82,23 +101,20 @@
             white-space: nowrap;
             color: #fff;
             font-weight: 900;
-            letter-spacing: -1.5px; /* Estilo compacto como la imagen 1 */
-            /* Efecto de resplandor suave de la imagen */
-            text-shadow: 
-                0 0 8px rgba(255, 255, 255, 0.8),
-                0 0 20px rgba(112, 214, 255, 0.4);
+            letter-spacing: -1.5px;
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.8), 0 0 20px rgba(112, 214, 255, 0.4);
             will-change: transform;
             cursor: pointer;
             user-select: none;
-            padding: 60px; 
-            margin: -60px;
+            padding: 40px; 
+            margin: -40px;
             pointer-events: auto;
         }
 
         .particle {
             position: absolute;
             pointer-events: none;
-            font-size: 35px;
+            font-size: 25px;
             z-index: 9999;
             animation: explode 0.9s forwards ease-out;
         }
@@ -138,13 +154,16 @@
 
         const scene = document.getElementById('scene');
         const starsContainer = document.getElementById('stars-container');
-        const numTexts = 150; 
+        
+        // Menos elementos en móviles para que no se trabe
+        const isMobile = window.innerWidth < 768;
+        const numTexts = isMobile ? 60 : 120; 
         const textsArray = [];
 
         function moveNebulas() {
             document.querySelectorAll('.nebula').forEach(neb => {
-                const randomX = Math.random() * (window.innerWidth - 300);
-                const randomY = Math.random() * (window.innerHeight - 300);
+                const randomX = Math.random() * (window.innerWidth - 200);
+                const randomY = Math.random() * (window.innerHeight - 200);
                 neb.style.left = `${randomX}px`;
                 neb.style.top = `${randomY}px`;
             });
@@ -152,7 +171,9 @@
         moveNebulas();
         setInterval(moveNebulas, 10000);
 
-        for (let i = 0; i < 200; i++) {
+        // Generar estrellas
+        const starCount = isMobile ? 100 : 200;
+        for (let i = 0; i < starCount; i++) {
             const star = document.createElement('div');
             star.className = 'star';
             star.style.width = star.style.height = `${Math.random() * 2.5}px`;
@@ -164,14 +185,15 @@
 
         function createExplosion(x, y, isSpecial) {
             const icon = isSpecial ? '💍' : '❤️';
-            for (let i = 0; i < 18; i++) {
+            const count = isMobile ? 10 : 18;
+            for (let i = 0; i < count; i++) {
                 const p = document.createElement('div');
                 p.className = 'particle';
                 p.innerHTML = icon;
                 p.style.left = `${x}px`;
                 p.style.top = `${y}px`;
-                p.style.setProperty('--tx', `${(Math.random() - 0.5) * 500}px`);
-                p.style.setProperty('--ty', `${(Math.random() - 0.5) * 500}px`);
+                p.style.setProperty('--tx', `${(Math.random() - 0.5) * (isMobile ? 300 : 500)}px`);
+                p.style.setProperty('--ty', `${(Math.random() - 0.5) * (isMobile ? 300 : 500)}px`);
                 document.body.appendChild(p);
                 setTimeout(() => p.remove(), 900);
             }
@@ -184,24 +206,29 @@
             textEl.textContent = choice.t;
             scene.appendChild(textEl);
 
+            // Ajuste de tamaño de fuente para móviles
+            const minSize = isMobile ? 16 : 20;
+            const maxSize = isMobile ? 28 : 45;
+
             const data = {
                 el: textEl,
                 isSpecial: choice.special,
-                x: (Math.random() - 0.5) * window.innerWidth * 3,
+                x: (Math.random() - 0.5) * window.innerWidth * (isMobile ? 2 : 3),
                 y: initial ? (Math.random() * window.innerHeight * 3 - window.innerHeight) : -1000,
                 z: Math.random() * 1500 - 1200, 
-                size: Math.floor(Math.random() * (45 - 20) + 20),
+                size: Math.floor(Math.random() * (maxSize - minSize) + minSize),
                 active: true
             };
 
-            textEl.addEventListener('mousedown', (e) => {
+            // Usamos 'pointerdown' para que funcione perfecto en Touch y Mouse
+            textEl.addEventListener('pointerdown', (e) => {
                 if(!data.active) return;
                 data.active = false;
                 createExplosion(e.clientX, e.clientY, data.isSpecial);
                 textEl.style.visibility = 'hidden';
                 setTimeout(() => {
                     data.y = -1000;
-                    data.x = (Math.random() - 0.5) * window.innerWidth * 3;
+                    data.x = (Math.random() - 0.5) * window.innerWidth * (isMobile ? 2 : 3);
                     data.z = Math.random() * 1500 - 1200;
                     data.active = true;
                     textEl.style.visibility = 'visible';
@@ -218,12 +245,12 @@
         function animate() {
             textsArray.forEach(t => {
                 if (!t.active) return;
-                let speed = 1.2 + ((t.z + 1200) / 1500) * 6;
+                let speed = 1.0 + ((t.z + 1200) / 1500) * (isMobile ? 4 : 6);
                 t.y += speed;
 
                 if (t.y > window.innerHeight + 800) {
                     t.y = -1000;
-                    t.x = (Math.random() - 0.5) * window.innerWidth * 3;
+                    t.x = (Math.random() - 0.5) * window.innerWidth * (isMobile ? 2 : 3);
                     t.z = Math.random() * 1500 - 1200;
                 }
 
