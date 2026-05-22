@@ -2,178 +2,68 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Lover Puzzle - 4x4</title>
-    <!-- Fuentes: Pinyon Script para títulos, Montserrat para UI, Dancing Script para la carta -->
     <link href="https://fonts.googleapis.com/css2?family=Pinyon+Script&family=Montserrat:wght@400;600&family=Dancing+Script:wght@500&display=swap" rel="stylesheet">
     <style>
         body {
-            background: 
-                radial-gradient(circle at 20% 20%, rgba(173, 216, 230, 0.7), transparent 50%),
-                radial-gradient(circle at 80% 30%, rgba(255, 182, 193, 0.8), transparent 50%),
-                radial-gradient(circle at 40% 80%, rgba(255, 240, 245, 0.9), transparent 60%),
-                radial-gradient(circle at 80% 80%, rgba(255, 223, 186, 0.6), transparent 50%),
-                linear-gradient(135deg, #e0c3fc 0%, #fbc2eb 100%);
-            background-size: 200% 200%;
+            background: linear-gradient(135deg, #e0c3fc 0%, #fbc2eb 100%);
             background-attachment: fixed;
-            animation: animateBackground 20s ease-in-out infinite;
             font-family: 'Montserrat', sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
             min-height: 100vh;
             margin: 0;
-            overflow: hidden;
-            position: relative;
-        }
-
-        @keyframes animateBackground {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+            overflow-x: hidden;
+            touch-action: manipulation;
         }
 
         /* Canvas de hojas cayendo */
         #leafCanvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: 1;
-            pointer-events: none;
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; pointer-events: none;
         }
 
         .interface-container {
-            position: relative;
-            z-index: 2;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            position: relative; z-index: 2; width: 100%; max-width: 840px; display: flex; flex-direction: column; align-items: center; padding: 10px;
         }
 
-        .header-container { text-align: center; margin-bottom: 20px; }
-
-        .lover-title {
-            font-family: 'Pinyon Script', cursive;
-            font-size: 85px;
-            color: #7b4397;
-            margin: 0;
-            line-height: 0.6;
-            text-shadow: 2px 2px 4px rgba(255,255,255,0.6);
-        }
-
-        h1 {
-            font-size: 22px;
-            font-weight: 600;
-            color: #4a4a4a;
-            margin: 5px 0 0 0;
-            letter-spacing: 1px;
-        }
+        .header-container { text-align: center; margin: 10px 0; }
+        .lover-title { font-family: 'Pinyon Script', cursive; font-size: 60px; color: #7b4397; margin: 0; line-height: 0.8; }
+        h1 { font-size: 18px; color: #4a4a4a; margin: 5px 0; }
 
         .canvas-container {
             background: rgba(255, 255, 255, 0.82);
-            padding: 20px;
+            padding: 10px;
             border-radius: 15px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            backdrop-filter: blur(8px);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            width: 95%;
+            max-width: 500px;
         }
 
-        .status-bar {
-            display: flex;
-            justify-content: space-between;
-            width: 100%;
-            max-width: 840px;
-            margin-bottom: 10px;
-            padding: 0 10px;
-            font-weight: 600;
-            color: #333333;
-            font-size: 16px;
-        }
+        .status-bar { display: flex; justify-content: space-between; margin-bottom: 10px; font-weight: 600; font-size: 14px; }
 
+        /* Adaptación a móvil: El canvas se ajusta al contenedor */
         canvas#puzzleCanvas {
+            width: 100%;
+            height: auto;
             background: #ffffff;
             border-radius: 8px;
-            cursor: grab;
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
-        }
-        
-        canvas#puzzleCanvas:active { cursor: grabbing; }
-
-        #win-message { display: none; text-align: center; margin-top: 15px; }
-
-        .win-legend {
-            color: #d63384;
-            font-size: 26px;
-            font-weight: bold;
-            animation: pulse 1.5s infinite;
-            margin-bottom: 15px;
-        }
-
-        .prize-button {
-            display: none;
-            padding: 12px 28px;
-            font-size: 18px;
-            font-weight: 600;
-            color: white;
-            background: linear-gradient(135deg, #ff6b8b 0%, #d63384 100%);
-            border: none;
-            border-radius: 30px;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(214, 51, 132, 0.4);
-            transition: all 0.3s ease;
-        }
-
-        .prize-button.show { display: inline-block; }
-
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-
-        #letterModal {
-            display: none; 
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0,0,0,0.7);
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-        }
-
-        .letter-paper {
-            background: #fffdf0;
-            padding: 40px;
-            width: 90%;
-            max-width: 500px;
-            border-radius: 5px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.3);
-            /* Fuente cursiva aplicada */
-            font-family: 'Dancing Script', cursive;
-            font-size: 20px;
-            color: #333;
-            line-height: 1.6;
-            text-align: justify;
-        }
-
-        .close-letter-btn {
             display: block;
-            margin: 25px auto 0;
-            padding: 8px 20px;
-            background: transparent;
-            color: #d63384;
-            border: 2px solid #d63384;
-            border-radius: 20px;
-            cursor: pointer;
-            font-family: 'Montserrat', sans-serif;
-            font-weight: bold;
+            touch-action: none; /* Evita scroll al tocar */
         }
+
+        .win-legend { color: #d63384; font-size: 24px; font-weight: bold; margin-top: 15px; }
+        .prize-button { 
+            display: none; padding: 15px 30px; font-size: 18px; background: linear-gradient(135deg, #ff6b8b 0%, #d63384 100%);
+            color: white; border: none; border-radius: 30px; margin-top: 10px;
+        }
+        .prize-button.show { display: block; }
+
+        /* Modal */
+        #letterModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; justify-content: center; align-items: center; }
+        .letter-paper { background: #fffdf0; padding: 30px; width: 85%; max-width: 400px; border-radius: 10px; font-family: 'Dancing Script', cursive; font-size: 18px; color: #333; line-height: 1.5; overflow-y: auto; max-height: 80vh; }
+        .close-letter-btn { display: block; margin: 20px auto 0; padding: 10px 20px; background: none; border: 2px solid #d63384; color: #d63384; border-radius: 20px; font-family: sans-serif; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -191,10 +81,11 @@
                 <div id="pieces-count">Piezas: 0 / 16</div>
                 <div id="timer">Tiempo: 00:00</div>
             </div>
+            <!-- Resolución interna fija para la lógica, CSS lo escala -->
             <canvas id="puzzleCanvas" width="840" height="520"></canvas>
         </div>
 
-        <div id="win-message">
+        <div id="win-message" style="display:none; text-align: center;">
             <div class="win-legend">¡Completo! ❤️</div>
             <button id="prizeButton" class="prize-button" onclick="recibirPremio()">Recibir premio 🎁</button>
         </div>
@@ -229,26 +120,21 @@ eso no va a cambiar.<br>
     </div>
 
     <script>
-        // 1. Lógica de hojas cayendo
+        // Lógica de hojas cayendo
         const leafCanvas = document.getElementById('leafCanvas');
         const lCtx = leafCanvas.getContext('2d');
-        function resizeLeafCanvas() { leafCanvas.width = window.innerWidth; leafCanvas.height = window.innerHeight; }
-        window.addEventListener('resize', resizeLeafCanvas); resizeLeafCanvas();
-
-        let leaves = Array.from({length: 40}, () => ({x: Math.random()*window.innerWidth, y: Math.random()*window.innerHeight, s: Math.random()*8+4}));
+        function resizeLeaf() { leafCanvas.width = window.innerWidth; leafCanvas.height = window.innerHeight; }
+        window.addEventListener('resize', resizeLeaf); resizeLeaf();
+        let leaves = Array.from({length: 30}, () => ({x: Math.random()*window.innerWidth, y: Math.random()*window.innerHeight, s: Math.random()*5+2}));
         function drawLeaves() {
             lCtx.clearRect(0,0, leafCanvas.width, leafCanvas.height);
-            lCtx.fillStyle = "rgba(255, 192, 203, 0.5)";
-            leaves.forEach(l => {
-                l.y += 1.5;
-                if(l.y > leafCanvas.height) l.y = -10;
-                lCtx.beginPath(); lCtx.arc(l.x, l.y, l.s, 0, Math.PI*2); lCtx.fill();
-            });
+            lCtx.fillStyle = "rgba(255, 192, 203, 0.4)";
+            leaves.forEach(l => { l.y += 1; if(l.y > leafCanvas.height) l.y = -10; lCtx.beginPath(); lCtx.arc(l.x, l.y, l.s, 0, Math.PI*2); lCtx.fill(); });
             requestAnimationFrame(drawLeaves);
         }
         drawLeaves();
 
-        // 2. Lógica del Rompecabezas (Original)
+        // Lógica del Rompecabezas
         const canvas = document.getElementById('puzzleCanvas');
         const ctx = canvas.getContext('2d');
         const ROWS = 4, COLS = 4;
@@ -258,6 +144,21 @@ eso no va a cambiar.<br>
         const puzzleImg = new Image();
         puzzleImg.src = 'E.png'; 
 
+        // Función para obtener posición normalizada (Mouse o Touch)
+        function getPos(e) {
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            // Escala para convertir coordenadas de pantalla a coordenadas del canvas interno
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            return {
+                x: (clientX - rect.left) * scaleX,
+                y: (clientY - rect.top) * scaleY
+            };
+        }
+
+        // --- Resto de las funciones drawEdgeKnob, drawPath, Class Piece... igual ---
         function drawEdgeKnob(targetCtx, startX, startY, endX, endY, outward) {
             let dx = endX - startX, dy = endY - startY, len = Math.hypot(dx, dy);
             let ux = dx / len, uy = dy / len, px = -uy, py = ux, sign = outward ? 1 : -1, size = len * 0.15;
@@ -267,7 +168,6 @@ eso no va a cambiar.<br>
             targetCtx.bezierCurveTo(startX+dx*0.74+px*size*0.75*sign, startY+dy*0.74+py*size*0.75*sign, startX+dx*0.62+px*size*0.05*sign, startY+dy*0.62+py*size*0.05*sign, startX+dx*0.62, startY+dy*0.62);
             targetCtx.lineTo(endX, endY);
         }
-
         function drawPath(targetCtx, x, y, w, h, row, col) {
             targetCtx.beginPath(); targetCtx.moveTo(x, y);
             row === 0 ? targetCtx.lineTo(x+w, y) : drawEdgeKnob(targetCtx, x, y, x+w, y, false);
@@ -276,7 +176,6 @@ eso no va a cambiar.<br>
             col === 0 ? targetCtx.lineTo(x, y) : drawEdgeKnob(targetCtx, x, y+h, x, y, false);
             targetCtx.closePath();
         }
-
         class Piece {
             constructor(r, c, w, h) {
                 this.row = r; this.col = c; this.w = w; this.h = h;
@@ -303,22 +202,36 @@ eso no va a cambiar.<br>
             requestAnimationFrame(animate);
         }
 
-        canvas.addEventListener('mousedown', e => {
-            const rect = canvas.getBoundingClientRect();
-            selectedPiece = pieces.find(p => !p.isSnapped && e.clientX-rect.left >= p.x && e.clientX-rect.left <= p.x+p.w && e.clientY-rect.top >= p.y && e.clientY-rect.top <= p.y+p.h);
-            if(selectedPiece) { isDragging = true; dragOffsetX = e.clientX-rect.left-selectedPiece.x; dragOffsetY = e.clientY-rect.top-selectedPiece.y; }
-        });
+        // --- Eventos unificados ---
+        function handleStart(e) {
+            const pos = getPos(e);
+            selectedPiece = pieces.find(p => !p.isSnapped && pos.x >= p.x && pos.x <= p.x+p.w && pos.y >= p.y && pos.y <= p.y+p.h);
+            if(selectedPiece) { isDragging = true; dragOffsetX = pos.x - selectedPiece.x; dragOffsetY = pos.y - selectedPiece.y; }
+        }
 
-        canvas.addEventListener('mousemove', e => { if(isDragging) { selectedPiece.x = e.clientX-canvas.getBoundingClientRect().left-dragOffsetX; selectedPiece.y = e.clientY-canvas.getBoundingClientRect().top-dragOffsetY; } });
+        function handleMove(e) {
+            if(isDragging) {
+                const pos = getPos(e);
+                selectedPiece.x = pos.x - dragOffsetX; selectedPiece.y = pos.y - dragOffsetY;
+            }
+        }
 
-        canvas.addEventListener('mouseup', () => {
-            if(isDragging && Math.hypot(selectedPiece.x-selectedPiece.correctX, selectedPiece.y-selectedPiece.correctY) < 25) {
+        function handleEnd() {
+            if(isDragging && Math.hypot(selectedPiece.x-selectedPiece.correctX, selectedPiece.y-selectedPiece.correctY) < 30) {
                 selectedPiece.x = selectedPiece.correctX; selectedPiece.y = selectedPiece.correctY; selectedPiece.isSnapped = true; snappedCount++;
                 document.getElementById('pieces-count').innerText = `Piezas: ${snappedCount} / 16`;
                 if(snappedCount === 16) { clearInterval(timerInterval); document.getElementById('win-message').style.display = 'block'; document.getElementById('prizeButton').classList.add('show'); }
             }
             isDragging = false;
-        });
+        }
+
+        canvas.addEventListener('mousedown', handleStart);
+        window.addEventListener('mousemove', handleMove);
+        window.addEventListener('mouseup', handleEnd);
+        
+        canvas.addEventListener('touchstart', (e) => { e.preventDefault(); handleStart(e); }, {passive: false});
+        window.addEventListener('touchmove', (e) => { handleMove(e); }, {passive: false});
+        window.addEventListener('touchend', handleEnd);
 
         function recibirPremio() { document.getElementById('letterModal').style.display = 'flex'; }
         puzzleImg.onload = init;
