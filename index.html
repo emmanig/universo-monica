@@ -1,270 +1,327 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monica's Deep Space Universe</title>
+    <title>Lover Puzzle - 4x4</title>
+    <!-- Fuentes: Pinyon Script para títulos, Montserrat para UI, Dancing Script para la carta -->
+    <link href="https://fonts.googleapis.com/css2?family=Pinyon+Script&family=Montserrat:wght@400;600&family=Dancing+Script:wght@500&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@900&display=swap');
-
         body {
+            background: 
+                radial-gradient(circle at 20% 20%, rgba(173, 216, 230, 0.7), transparent 50%),
+                radial-gradient(circle at 80% 30%, rgba(255, 182, 193, 0.8), transparent 50%),
+                radial-gradient(circle at 40% 80%, rgba(255, 240, 245, 0.9), transparent 60%),
+                radial-gradient(circle at 80% 80%, rgba(255, 223, 186, 0.6), transparent 50%),
+                linear-gradient(135deg, #e0c3fc 0%, #fbc2eb 100%);
+            background-size: 200% 200%;
+            background-attachment: fixed;
+            animation: animateBackground 20s ease-in-out infinite;
+            font-family: 'Montserrat', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
             margin: 0;
-            background-color: #000;
             overflow: hidden;
-            font-family: 'Inter', sans-serif;
-            height: 100vh;
-            width: 100vw;
-            perspective: 1000px; /* Reducido un poco para móviles */
             position: relative;
-            cursor: crosshair;
-            touch-action: none; /* Evita el scroll accidental en el cel */
         }
 
-        /* --- NEBULOSAS RESPONSIVAS --- */
-        .nebula {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(80px); /* Menos blur para mejor rendimiento en cel */
-            opacity: 0.3;
-            z-index: -5;
-            transition: all 12s ease-in-out;
+        @keyframes animateBackground {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Canvas de hojas cayendo */
+        #leafCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
             pointer-events: none;
         }
 
-        /* Ajuste de tamaños para escritorio */
-        .n1 { width: 60vw; height: 60vw; background: radial-gradient(circle, #6a0dad, transparent); }
-        .n2 { width: 50vw; height: 50vw; background: radial-gradient(circle, #001f3f, transparent); }
-        .n3 { width: 45vw; height: 45vw; background: radial-gradient(circle, #4b0082, transparent); }
-        .n4 { width: 55vw; height: 55vw; background: radial-gradient(circle, #1e90ff, transparent); }
-        .n5 { width: 40vw; height: 40vw; background: radial-gradient(circle, #8a2be2, transparent); }
-        .n6 { width: 50vw; height: 50vw; background: radial-gradient(circle, #00008b, transparent); }
-
-        /* --- MEDIA QUERY PARA CELULARES --- */
-        @media (max-width: 768px) {
-            .nebula {
-                filter: blur(50px);
-                opacity: 0.4;
-            }
-            .moon {
-                width: 50px !important;
-                height: 50px !important;
-                right: 5% !important;
-            }
-            .floating-text {
-                letter-spacing: -0.5px !important; /* Menos apretado en pantallas chicas */
-                text-shadow: 0 0 5px rgba(255, 255, 255, 0.8) !important;
-            }
+        .interface-container {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
-        .moon {
-            position: absolute;
-            top: 40px;
-            right: 12%;
-            width: 70px;
-            height: 70px;
-            background-color: transparent;
-            border-radius: 50%;
-            box-shadow: 12px 8px 0 0 #f0f0f0;
-            filter: drop-shadow(0 0 10px rgba(255,255,255,0.4));
-            transform: rotate(-20deg);
-            z-index: -4;
-            pointer-events: none;
+        .header-container { text-align: center; margin-bottom: 20px; }
+
+        .lover-title {
+            font-family: 'Pinyon Script', cursive;
+            font-size: 85px;
+            color: #7b4397;
+            margin: 0;
+            line-height: 0.6;
+            text-shadow: 2px 2px 4px rgba(255,255,255,0.6);
         }
 
-        #stars-container {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            z-index: -6;
-        }
-        .star {
-            position: absolute;
-            background: white;
-            border-radius: 50%;
-            animation: twinkle var(--duration) infinite ease-in-out;
-        }
-        @keyframes twinkle {
-            0%, 100% { opacity: 0.2; transform: scale(1); }
-            50% { opacity: 0.8; transform: scale(1.3); }
+        h1 {
+            font-size: 22px;
+            font-weight: 600;
+            color: #4a4a4a;
+            margin: 5px 0 0 0;
+            letter-spacing: 1px;
         }
 
-        .container {
-            position: absolute;
-            top: 0; left: 0;
+        .canvas-container {
+            background: rgba(255, 255, 255, 0.82);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(8px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
             width: 100%;
-            height: 100%;
-            transform-style: preserve-3d;
-            z-index: 10;
+            max-width: 840px;
+            margin-bottom: 10px;
+            padding: 0 10px;
+            font-weight: 600;
+            color: #333333;
+            font-size: 16px;
         }
 
-        .floating-text {
-            position: absolute;
-            white-space: nowrap;
-            color: #fff;
-            font-weight: 900;
-            letter-spacing: -1.5px;
-            text-shadow: 0 0 8px rgba(255, 255, 255, 0.8), 0 0 20px rgba(112, 214, 255, 0.4);
-            will-change: transform;
+        canvas#puzzleCanvas {
+            background: #ffffff;
+            border-radius: 8px;
+            cursor: grab;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+        }
+        
+        canvas#puzzleCanvas:active { cursor: grabbing; }
+
+        #win-message { display: none; text-align: center; margin-top: 15px; }
+
+        .win-legend {
+            color: #d63384;
+            font-size: 26px;
+            font-weight: bold;
+            animation: pulse 1.5s infinite;
+            margin-bottom: 15px;
+        }
+
+        .prize-button {
+            display: none;
+            padding: 12px 28px;
+            font-size: 18px;
+            font-weight: 600;
+            color: white;
+            background: linear-gradient(135deg, #ff6b8b 0%, #d63384 100%);
+            border: none;
+            border-radius: 30px;
             cursor: pointer;
-            user-select: none;
-            padding: 40px; 
-            margin: -40px;
-            pointer-events: auto;
+            box-shadow: 0 4px 15px rgba(214, 51, 132, 0.4);
+            transition: all 0.3s ease;
         }
 
-        .particle {
-            position: absolute;
-            pointer-events: none;
-            font-size: 25px;
+        .prize-button.show { display: inline-block; }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        #letterModal {
+            display: none; 
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            justify-content: center;
+            align-items: center;
             z-index: 9999;
-            animation: explode 0.9s forwards ease-out;
         }
 
-        @keyframes explode {
-            0% { transform: translate(0, 0) scale(1.5) rotate(0deg); opacity: 1; }
-            100% { transform: translate(var(--tx), var(--ty)) scale(0) rotate(360deg); opacity: 0; }
+        .letter-paper {
+            background: #fffdf0;
+            padding: 40px;
+            width: 90%;
+            max-width: 500px;
+            border-radius: 5px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.3);
+            /* Fuente cursiva aplicada */
+            font-family: 'Dancing Script', cursive;
+            font-size: 20px;
+            color: #333;
+            line-height: 1.6;
+            text-align: justify;
+        }
+
+        .close-letter-btn {
+            display: block;
+            margin: 25px auto 0;
+            padding: 8px 20px;
+            background: transparent;
+            color: #d63384;
+            border: 2px solid #d63384;
+            border-radius: 20px;
+            cursor: pointer;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
 
-    <div id="stars-container"></div>
-    <div class="moon"></div>
-    
-    <div class="nebula n1"></div>
-    <div class="nebula n2"></div>
-    <div class="nebula n3"></div>
-    <div class="nebula n4"></div>
-    <div class="nebula n5"></div>
-    <div class="nebula n6"></div>
+    <canvas id="leafCanvas"></canvas>
 
-    <div class="container" id="scene"></div>
+    <div class="interface-container">
+        <div class="header-container">
+            <div class="lover-title">Lover</div>
+            <h1>Rompecabezas 4x4</h1>
+        </div>
+
+        <div class="canvas-container">
+            <div class="status-bar">
+                <div id="pieces-count">Piezas: 0 / 16</div>
+                <div id="timer">Tiempo: 00:00</div>
+            </div>
+            <canvas id="puzzleCanvas" width="840" height="520"></canvas>
+        </div>
+
+        <div id="win-message">
+            <div class="win-legend">¡Completo! ❤️</div>
+            <button id="prizeButton" class="prize-button" onclick="recibirPremio()">Recibir premio 🎁</button>
+        </div>
+    </div>
+
+    <div id="letterModal">
+        <div class="letter-paper">
+            Amoooor, mi niña hermosa…
+
+Esta carta la hago con todo el cariño que existe dentro de mí, porque lo que siento por ti es tan grande que a veces ni yo mismo logro entenderlo. Y quizá tú tampoco alcances a ver todo lo que provocas en mí.
+Quiero escribir demasiado, llenarte de palabras bonitas, pero cuando intento explicar lo que eres para mí, el corazón siempre siente más de lo que la mente sabe decir.
+
+Me ayudas muchísimo, más de lo que imaginas.
+A veces sigo preguntándome por qué me elegiste a mí entre tantas personas, y aunque mi cabeza esté llena de dudas y pensamientos que no me dejan descansar, deseo con todo mi corazón que nunca cambies de opinión sobre nosotros.
+
+Soy alguien muy paranoico, y mi mente puede convertir la vida en un lugar ruidoso y cansado. Pero entonces apareces tú… y todo se queda en silencio.
+Escucharte se siente tan bonito que hasta me da miedo, porque haces que baje todas mis defensas sin darme cuenta. Contigo pierdo, y sinceramente… me encanta perder así.
+
+Cuando no estás, mi corazón se llena de preguntas, de inseguridades, de un vacío extraño que arde por dentro. Pero basta un mensaje tuyo, una llamada, un abrazo, incluso una pequeña palabra tuya, para que todo deje de doler.
+Me calmas de una manera que nadie más puede hacerlo.
+
+No sé si está bien necesitar tanto a alguien, pero dios… no podría mirar a otra persona cuando tú te has convertido en mi lugar seguro, en mi tranquilidad favorita, en eso que sana incluso mis peores días.
+
+Tal vez no sepa definir exactamente qué es el amor, pero sí sé esto:
+quiero cuidar de ti, de tu corazón, de tu sentir y de cada parte de ti que me permites conocer.
+
+Te amo demasiado, y quiero que tengas claro algo…
+eso no va a cambiar.<br>
+            Te amo, Mónica.
+            <button class="close-letter-btn" onclick="document.getElementById('letterModal').style.display='none'">Volver</button>
+        </div>
+    </div>
 
     <script>
-        const phrases = [
-            { t: "I love you, my beautiful girl Monica 👧🏻💖", special: false },
-            { t: "You are very special ✨💎", special: false },
-            { t: "You are magnificent 🌟🤩", special: false },
-            { t: "There is no one like you in the world 🌍🚫", special: false },
-            { t: "You are everything I need 🫂💗", special: false },
-            { t: "Will you marry me? 💍❓", special: true },
-            { t: "Monica, my robloxina 🎮🎀", special: false },
-            { t: "Monica, my little mouse 🐭🧀", special: false },
-            { t: "Monica, I love you so much ♾️❤️", special: false }
-        ];
+        // 1. Lógica de hojas cayendo
+        const leafCanvas = document.getElementById('leafCanvas');
+        const lCtx = leafCanvas.getContext('2d');
+        function resizeLeafCanvas() { leafCanvas.width = window.innerWidth; leafCanvas.height = window.innerHeight; }
+        window.addEventListener('resize', resizeLeafCanvas); resizeLeafCanvas();
 
-        const scene = document.getElementById('scene');
-        const starsContainer = document.getElementById('stars-container');
-        
-        // Menos elementos en móviles para que no se trabe
-        const isMobile = window.innerWidth < 768;
-        const numTexts = isMobile ? 60 : 120; 
-        const textsArray = [];
-
-        function moveNebulas() {
-            document.querySelectorAll('.nebula').forEach(neb => {
-                const randomX = Math.random() * (window.innerWidth - 200);
-                const randomY = Math.random() * (window.innerHeight - 200);
-                neb.style.left = `${randomX}px`;
-                neb.style.top = `${randomY}px`;
+        let leaves = Array.from({length: 40}, () => ({x: Math.random()*window.innerWidth, y: Math.random()*window.innerHeight, s: Math.random()*8+4}));
+        function drawLeaves() {
+            lCtx.clearRect(0,0, leafCanvas.width, leafCanvas.height);
+            lCtx.fillStyle = "rgba(255, 192, 203, 0.5)";
+            leaves.forEach(l => {
+                l.y += 1.5;
+                if(l.y > leafCanvas.height) l.y = -10;
+                lCtx.beginPath(); lCtx.arc(l.x, l.y, l.s, 0, Math.PI*2); lCtx.fill();
             });
+            requestAnimationFrame(drawLeaves);
         }
-        moveNebulas();
-        setInterval(moveNebulas, 10000);
+        drawLeaves();
 
-        // Generar estrellas
-        const starCount = isMobile ? 100 : 200;
-        for (let i = 0; i < starCount; i++) {
-            const star = document.createElement('div');
-            star.className = 'star';
-            star.style.width = star.style.height = `${Math.random() * 2.5}px`;
-            star.style.top = `${Math.random() * 100}%`;
-            star.style.left = `${Math.random() * 100}%`;
-            star.style.setProperty('--duration', `${2 + Math.random() * 4}s`);
-            starsContainer.appendChild(star);
+        // 2. Lógica del Rompecabezas (Original)
+        const canvas = document.getElementById('puzzleCanvas');
+        const ctx = canvas.getContext('2d');
+        const ROWS = 4, COLS = 4;
+        let pieces = [], selectedPiece = null, isDragging = false, dragOffsetX = 0, dragOffsetY = 0;
+        let snappedCount = 0, timerInterval, secondsElapsed = 0;
+        
+        const puzzleImg = new Image();
+        puzzleImg.src = 'E.png'; 
+
+        function drawEdgeKnob(targetCtx, startX, startY, endX, endY, outward) {
+            let dx = endX - startX, dy = endY - startY, len = Math.hypot(dx, dy);
+            let ux = dx / len, uy = dy / len, px = -uy, py = ux, sign = outward ? 1 : -1, size = len * 0.15;
+            targetCtx.lineTo(startX + dx * 0.38, startY + dy * 0.38);
+            targetCtx.bezierCurveTo(startX + dx*0.38+px*size*0.05*sign, startY+dy*0.38+py*size*0.05*sign, startX+dx*0.26+px*size*0.75*sign, startY+dy*0.26+py*size*0.75*sign, startX+dx*0.35+px*size*sign, startY+dy*0.35+py*size*sign);
+            targetCtx.bezierCurveTo(startX+dx*0.42+px*size*1.35*sign, startY+dy*0.42+py*size*1.35*sign, startX+dx*0.58+px*size*1.35*sign, startY+dy*0.58+py*size*1.35*sign, startX+dx*0.65+px*size*sign, startY+dy*0.65+py*size*sign);
+            targetCtx.bezierCurveTo(startX+dx*0.74+px*size*0.75*sign, startY+dy*0.74+py*size*0.75*sign, startX+dx*0.62+px*size*0.05*sign, startY+dy*0.62+py*size*0.05*sign, startX+dx*0.62, startY+dy*0.62);
+            targetCtx.lineTo(endX, endY);
         }
 
-        function createExplosion(x, y, isSpecial) {
-            const icon = isSpecial ? '💍' : '❤️';
-            const count = isMobile ? 10 : 18;
-            for (let i = 0; i < count; i++) {
-                const p = document.createElement('div');
-                p.className = 'particle';
-                p.innerHTML = icon;
-                p.style.left = `${x}px`;
-                p.style.top = `${y}px`;
-                p.style.setProperty('--tx', `${(Math.random() - 0.5) * (isMobile ? 300 : 500)}px`);
-                p.style.setProperty('--ty', `${(Math.random() - 0.5) * (isMobile ? 300 : 500)}px`);
-                document.body.appendChild(p);
-                setTimeout(() => p.remove(), 900);
+        function drawPath(targetCtx, x, y, w, h, row, col) {
+            targetCtx.beginPath(); targetCtx.moveTo(x, y);
+            row === 0 ? targetCtx.lineTo(x+w, y) : drawEdgeKnob(targetCtx, x, y, x+w, y, false);
+            col === COLS-1 ? targetCtx.lineTo(x+w, y+h) : drawEdgeKnob(targetCtx, x+w, y, x+w, y+h, true);
+            row === ROWS-1 ? targetCtx.lineTo(x, y+h) : drawEdgeKnob(targetCtx, x+w, y+h, x, y+h, true);
+            col === 0 ? targetCtx.lineTo(x, y) : drawEdgeKnob(targetCtx, x, y+h, x, y, false);
+            targetCtx.closePath();
+        }
+
+        class Piece {
+            constructor(r, c, w, h) {
+                this.row = r; this.col = c; this.w = w; this.h = h;
+                this.correctX = 460 + c * w; this.correctY = 80 + r * h;
+                this.x = Math.random() * 300; this.y = Math.random() * 400; this.isSnapped = false;
+            }
+            draw() {
+                ctx.save(); drawPath(ctx, this.x, this.y, this.w, this.h, this.row, this.col); ctx.clip();
+                ctx.drawImage(puzzleImg, this.col * (puzzleImg.width/COLS), this.row * (puzzleImg.height/ROWS), puzzleImg.width/COLS, puzzleImg.height/ROWS, this.x, this.y, this.w, this.h);
+                ctx.restore(); drawPath(ctx, this.x, this.y, this.w, this.h, this.row, this.col); ctx.stroke();
             }
         }
 
-        function createText(initial = false) {
-            const textEl = document.createElement('div');
-            textEl.className = 'floating-text';
-            const choice = phrases[Math.floor(Math.random() * phrases.length)];
-            textEl.textContent = choice.t;
-            scene.appendChild(textEl);
-
-            // Ajuste de tamaño de fuente para móviles
-            const minSize = isMobile ? 16 : 20;
-            const maxSize = isMobile ? 28 : 45;
-
-            const data = {
-                el: textEl,
-                isSpecial: choice.special,
-                x: (Math.random() - 0.5) * window.innerWidth * (isMobile ? 2 : 3),
-                y: initial ? (Math.random() * window.innerHeight * 3 - window.innerHeight) : -1000,
-                z: Math.random() * 1500 - 1200, 
-                size: Math.floor(Math.random() * (maxSize - minSize) + minSize),
-                active: true
-            };
-
-            // Usamos 'pointerdown' para que funcione perfecto en Touch y Mouse
-            textEl.addEventListener('pointerdown', (e) => {
-                if(!data.active) return;
-                data.active = false;
-                createExplosion(e.clientX, e.clientY, data.isSpecial);
-                textEl.style.visibility = 'hidden';
-                setTimeout(() => {
-                    data.y = -1000;
-                    data.x = (Math.random() - 0.5) * window.innerWidth * (isMobile ? 2 : 3);
-                    data.z = Math.random() * 1500 - 1200;
-                    data.active = true;
-                    textEl.style.visibility = 'visible';
-                }, 1500);
-            });
-
-            return data;
-        }
-
-        for (let i = 0; i < numTexts; i++) {
-            textsArray.push(createText(true));
+        function init() {
+            for(let r=0; r<ROWS; r++) for(let c=0; c<COLS; c++) pieces.push(new Piece(r, c, 360/COLS, 360/ROWS));
+            timerInterval = setInterval(() => { secondsElapsed++; document.getElementById('timer').innerText = `Tiempo: ${Math.floor(secondsElapsed/60).toString().padStart(2,'0')}:${(secondsElapsed%60).toString().padStart(2,'0')}`; }, 1000);
+            animate();
         }
 
         function animate() {
-            textsArray.forEach(t => {
-                if (!t.active) return;
-                let speed = 1.0 + ((t.z + 1200) / 1500) * (isMobile ? 4 : 6);
-                t.y += speed;
-
-                if (t.y > window.innerHeight + 800) {
-                    t.y = -1000;
-                    t.x = (Math.random() - 0.5) * window.innerWidth * (isMobile ? 2 : 3);
-                    t.z = Math.random() * 1500 - 1200;
-                }
-
-                let opacity = 0.3 + ((t.z + 1200) / 1500) * 0.7;
-                let blur = t.z < -600 ? Math.abs(t.z + 600) / 100 : 0;
-                
-                t.el.style.fontSize = t.size + "px";
-                t.el.style.opacity = opacity;
-                t.el.style.filter = `blur(${blur}px)`;
-                t.el.style.transform = `translate3d(${t.x}px, ${t.y}px, ${t.z}px)`;
-            });
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            ctx.strokeRect(460, 80, 360, 360);
+            pieces.forEach(p => p.draw());
             requestAnimationFrame(animate);
         }
-        animate();
+
+        canvas.addEventListener('mousedown', e => {
+            const rect = canvas.getBoundingClientRect();
+            selectedPiece = pieces.find(p => !p.isSnapped && e.clientX-rect.left >= p.x && e.clientX-rect.left <= p.x+p.w && e.clientY-rect.top >= p.y && e.clientY-rect.top <= p.y+p.h);
+            if(selectedPiece) { isDragging = true; dragOffsetX = e.clientX-rect.left-selectedPiece.x; dragOffsetY = e.clientY-rect.top-selectedPiece.y; }
+        });
+
+        canvas.addEventListener('mousemove', e => { if(isDragging) { selectedPiece.x = e.clientX-canvas.getBoundingClientRect().left-dragOffsetX; selectedPiece.y = e.clientY-canvas.getBoundingClientRect().top-dragOffsetY; } });
+
+        canvas.addEventListener('mouseup', () => {
+            if(isDragging && Math.hypot(selectedPiece.x-selectedPiece.correctX, selectedPiece.y-selectedPiece.correctY) < 25) {
+                selectedPiece.x = selectedPiece.correctX; selectedPiece.y = selectedPiece.correctY; selectedPiece.isSnapped = true; snappedCount++;
+                document.getElementById('pieces-count').innerText = `Piezas: ${snappedCount} / 16`;
+                if(snappedCount === 16) { clearInterval(timerInterval); document.getElementById('win-message').style.display = 'block'; document.getElementById('prizeButton').classList.add('show'); }
+            }
+            isDragging = false;
+        });
+
+        function recibirPremio() { document.getElementById('letterModal').style.display = 'flex'; }
+        puzzleImg.onload = init;
     </script>
 </body>
 </html>
